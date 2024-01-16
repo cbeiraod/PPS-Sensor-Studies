@@ -322,8 +322,8 @@ class PPSHitmap:
 
             persistance["pad_col_{}_legend".format(col)] = TLegend(0.75,0.9,0.9,0.9 - 0.05*maxNumShifts)
 
-            minFlux = None
-            maxFlux = None
+            minFlux = -10.0
+            maxFlux = -10.0
             if baseColor is None:
                 baseColor = kAzure
             for nShift in range(1, maxNumShifts+1):
@@ -361,9 +361,9 @@ class PPSHitmap:
                         fluxMinus += self.map[xVal][yVal] * integratedLuminosity/(nShift+1)
                     yArrDown.append(fluxMinus)
 
-                    if minFlux is None:
+                    if minFlux < 0:
                         minFlux = fluxPlus
-                    if maxFlux is None:
+                    if maxFlux < 0:
                         maxFlux = fluxPlus
 
                     if fluxPlus > maxFlux:
