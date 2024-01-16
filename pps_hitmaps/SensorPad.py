@@ -457,6 +457,20 @@ class SensorPad:
 
         return (canv, persistance)
 
+    def plotDoseOverDays(self, maxTime=365, integratedLuminosity=300, usePadSpacing=True):
+        """
+        maxTime in days
+        integratedLuminosity in fb-1
+        """
+
+        doses = self.doses
+        epochLumi = float(integratedLuminosity)/self.epochs
+        epochTime = float(maxTime)/self.epochs
+        maxDose = 0
+        for epoch in range(self.epochs):
+            maxDose += (doses[epoch]["totalFlux"] * doses[epoch]["occupancyNorm"] * epochLumi)/(padArea/100) # convert mm^2 to cm^2
+
+
     def plotDoseEOL(self, integratedLuminosity=300, usePadSpacing = True):
         """
         maxTime in days

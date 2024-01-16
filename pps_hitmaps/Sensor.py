@@ -31,6 +31,8 @@ def calcLossProb(deadtime, occupancy, bunchSpacing=25.):
     timeStep = floor(deadtime/float(bunchSpacing))
     return 1 - (occupancy ** 2)/((1 - exp(-occupancy))**2) * exp(-2*occupancy * (timeStep + 1))
 
+# TODO: Check what is using so much memory
+
 class Sensor:
     numPads = NonNegativeIntField()
     shifts = FloatPairListField()
@@ -69,6 +71,8 @@ class Sensor:
             pad.calculateFlux(self.shifts, hitmap) # Remember PPSHitmap is in m, sensor is in mm
 
         self.hasFlux = True
+        # TODO: this function needs to be called before some of the others make sense... add a check
+        # Also, modifying the shifts, invalidates previous flux call, so double check that too
 
     def findMaxOccupancy(self, usePadSpacing=True):
         if not self.hasFlux:
