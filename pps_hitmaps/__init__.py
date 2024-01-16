@@ -28,6 +28,8 @@ from .Sensor import Sensor
 from .Sensor import calcLossProb
 from .CustomizedSensors import *
 
+from .functions import *
+
 __all__ = [
     "PPSHitmap",
     "SensorPad",
