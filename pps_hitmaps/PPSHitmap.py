@@ -537,3 +537,29 @@ class PPSHitmap:
             graph = TGraph(bins, x, y)
 
         return graph
+
+    def squarePadOccupancy(
+            self,
+            minPadSize: float = 1e-6,
+            maxPadSize: float = 1e-2,
+            steps: int = 50,
+            doLog: bool = True,
+            lengthScale: float = 1.0e6,
+            pointStepping: int = 2,
+                           ):
+
+        from math import ceil, floor
+
+        pointsMinSize = ceil(minPadSize/self.xStep)*self.xStep
+        pointsBins = floor((maxPadSize - pointsMinSize)/(self.xStep*pointStepping)) + 1
+        pointsMaxSize = pointsMinSize + self.xStep * pointStepping * (pointsBins - 1)
+
+        uniformGraph   = self.squarePadPeakUniformGraph(steps, minPadSize, maxPadSize, padScale = lengthScale, doLog = doLog)
+        integrateGraph = self.squarePadIntegrateGraph(steps, minPadSize, maxPadSize, padScale = lengthScale, doLog = doLog)
+        pointsGraph    = self.squarePadIntegrateGraph(pointsBins, pointsMinSize, pointsMaxSize, padScale = lengthScale)
+
+        return {
+            'uniform': uniformGraph,
+            'integrate': integrateGraph,
+            'points': pointsGraph,
+        }
