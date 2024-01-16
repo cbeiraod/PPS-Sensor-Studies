@@ -26,20 +26,20 @@ class PPSHitmap:
     map: dict
     maxFluence: dict
     def __init__(self,
-                 filename,
-                 station,
-                 approximateDetectorEdge, # in mm
-                 physics = True,
-                 calib = False,
-                 xMin = 0.0, # in m
-                 xMax = 0.042, # in m
-                 xStep = 0.00005, # in m
-                 yMin = -0.042, # in m
-                 yMax = 0.042, # in m
-                 yStep = 0.00005, # in m
-                 betastar = 0.15,
-                 verbose = False,
-                 addBackgroundFlux = None
+                 filename: str,
+                 station: str,
+                 approximateDetectorEdge: float, # in mm
+                 physics: bool = True,
+                 calib: bool = False,
+                 xMin: float = 0.0, # in m
+                 xMax: float = 0.042, # in m
+                 xStep: float = 0.00005, # in m
+                 yMin: float = -0.042, # in m
+                 yMax: float = 0.042, # in m
+                 yStep: float = 0.00005, # in m
+                 betastar: float = 0.15,
+                 verbose: bool = False,
+                 addBackgroundFlux: float | None = None
                 ):
         self.filename = filename
         self.station = station
@@ -149,7 +149,11 @@ class PPSHitmap:
         if len(self.map) != 0:
             self.map = {}
 
-    def getHisto(self, name, title):
+    def getHisto(
+            self,
+            name: str,
+            title: str,
+                 ):
         self._checkValid()
 
         from ROOT import TH2D  # type: ignore
@@ -184,7 +188,11 @@ class PPSHitmap:
 
         return hist
 
-    def peakUniformPadOccupancy(self, xLen, yLen):
+    def peakUniformPadOccupancy(
+            self,
+            xLen: float,
+            yLen: float,
+                                ):
         """xLen and yLen in m"""
         self._checkValid()
 
@@ -195,7 +203,11 @@ class PPSHitmap:
         else:
             return None
 
-    def integratePadOccupancy(self, xLen, yLen):
+    def integratePadOccupancy(
+            self,
+            xLen: float,
+            yLen: float,
+                              ):
         """xLen and yLen in m"""
         self._checkValid()
 
@@ -240,7 +252,18 @@ class PPSHitmap:
         occupancy = fluence * 1.6E-12 * (self.xStep * self.yStep) * 1.0E4
         return occupancy
 
-    def plotShifts(self, integratedLuminosity=300, padLength = 1.3, plotPadCols = 2, maxCols = 3, maxNumShifts=4, thresholdFlux = None, baseColor = None, colorOffset=3, drawOneSided=False):
+    def plotShifts(
+            self,
+            integratedLuminosity: float = 300,
+            padLength: float = 1.3,
+            plotPadCols: int = 2,
+            maxCols: int = 3,
+            maxNumShifts: int = 4,
+            thresholdFlux: float | None = None,
+            baseColor = None,
+            colorOffset: int = 3,
+            drawOneSided: bool = False,
+                   ):
         self._checkValid()
 
         firstIdx = None
@@ -402,7 +425,13 @@ class PPSHitmap:
 
         return canv, persistance
 
-    def squarePadPeakUniformScan(self, bins, minPad, maxPad, doLog = False):
+    def squarePadPeakUniformScan(
+            self,
+            bins: int,
+            minPad: float,
+            maxPad: float,
+            doLog: bool = False,
+                                 ):
         if bins <= 1:
             raise ValueError("You must set 2 or more bins for the bin integration")
         if doLog and minPad == 0:
@@ -425,7 +454,13 @@ class PPSHitmap:
 
         return (padSize,occupancy)
 
-    def squarePadIntegrateScan(self, bins, minPad, maxPad, doLog = False):
+    def squarePadIntegrateScan(
+            self,
+            bins: int,
+            minPad: float,
+            maxPad: float,
+            doLog: bool = False,
+                               ):
         if bins <= 1:
             raise ValueError("You must set 2 or more bins for the bin integration")
         if doLog and minPad == 0:
@@ -448,7 +483,14 @@ class PPSHitmap:
 
         return (padSize,occupancy)
 
-    def squarePadPeakUniformGraph(self, bins, minPad, maxPad, padScale = 1, doLog = False):
+    def squarePadPeakUniformGraph(
+            self,
+            bins: int,
+            minPad: float,
+            maxPad: float,
+            padScale: float = 1,
+            doLog: bool = False,
+                                  ):
         from ROOT import TGraph  # type: ignore
 
         from array import array
@@ -469,7 +511,14 @@ class PPSHitmap:
 
         return graph
 
-    def squarePadIntegrateGraph(self, bins, minPad, maxPad, padScale = 1, doLog = False):
+    def squarePadIntegrateGraph(
+            self,
+            bins: int,
+            minPad: float,
+            maxPad: float,
+            padScale: float = 1,
+            doLog: bool = False,
+                                ):
         from ROOT import TGraph  # type: ignore
         from array import array
 
