@@ -563,3 +563,166 @@ class PPSHitmap:
             'integrate': integrateGraph,
             'points': pointsGraph,
         }
+
+    def rectangularPadPeakUniformScan(
+            self,
+            bins: int,
+            minPad: float,
+            maxPad: float,
+            doLog: bool = False,
+            xLen : float | None = None,
+            yLen : float | None = None,
+                                 ):
+        if bins <= 1:
+            raise ValueError("You must set 2 or more bins for the bin integration")
+        if doLog and minPad == 0:
+            raise ValueError("You can not set the minimum to 0 when using a logarithm scale")
+        if xLen is None and yLen is None:
+            raise RuntimeError("You must specify a fixed value for either the x length of the pad or the y length of the pad, none was set")
+        if xLen is not None and yLen is not None:
+            raise RuntimeError("You must specify a fixed value for either the x length of the pad or the y length of the pad, both were set")
+
+        from math import log
+        padSize = []
+        occupancy = []
+
+        step = (maxPad - minPad)/(bins-1)
+        if doLog:
+            step = (log(maxPad,2) - log(minPad,2))/(bins-1)
+
+        for ibin in range(bins):
+            if doLog:
+                padSize += [2**(ibin * step + log(minPad,2))]
+            else:
+                padSize += [ibin * step + minPad]
+            if xLen is not None:
+                occupancy += [self.peakUniformPadOccupancy(xLen, padSize[ibin])]
+            if yLen is not None:
+                occupancy += [self.peakUniformPadOccupancy(padSize[ibin], yLen)]
+
+        return (padSize,occupancy)
+
+    def rectangularPadIntegrateScan(
+            self,
+            bins: int,
+            minPad: float,
+            maxPad: float,
+            doLog: bool = False,
+            xLen : float | None = None,
+            yLen : float | None = None,
+                               ):
+        if bins <= 1:
+            raise ValueError("You must set 2 or more bins for the bin integration")
+        if doLog and minPad == 0:
+            raise ValueError("You can not set the minimum to 0 when using a logarithm scale")
+        if xLen is None and yLen is None:
+            raise RuntimeError("You must specify a fixed value for either the x length of the pad or the y length of the pad, none was set")
+        if xLen is not None and yLen is not None:
+            raise RuntimeError("You must specify a fixed value for either the x length of the pad or the y length of the pad, both were set")
+
+        from math import log
+        padSize = []
+        occupancy = []
+
+        step = (maxPad - minPad)/(bins-1)
+        if doLog:
+            step = (log(maxPad,2) - log(minPad,2))/(bins-1)
+
+        for ibin in range(bins):
+            if doLog:
+                padSize += [2**(ibin * step + log(minPad,2))]
+            else:
+                padSize += [ibin * step + minPad]
+            if xLen is not None:
+                occupancy += [self.integratePadOccupancy(xLen, padSize[ibin])]
+            if yLen is not None:
+                occupancy += [self.integratePadOccupancy(padSize[ibin], yLen)]
+
+        return (padSize,occupancy)
+
+    def rectangularPadPeakUniformGraph(
+            self,
+            bins: int,
+            minPad: float,
+            maxPad: float,
+            padScale: float = 1,
+            doLog: bool = False,
+            xLen : float | None = None,
+            yLen : float | None = None,
+                                  ):
+        from ROOT import TGraph  # type: ignore
+
+        from array import array
+        (padSize, occupancy) = self.rectangularPadPeakUniformScan(bins, minPad, maxPad, doLog = doLog, xLen = xLen, yLen = yLen)
+        for ibin in range(len(padSize)):
+            padSize[ibin] = padSize[ibin] * padScale
+
+        x, y = array( 'd' ), array( 'd' )
+        graph = TGraph()
+        for ibin in range(len(padSize)):
+            x.append(padSize[ibin])
+            if occupancy[ibin] is not None:
+                y.append(occupancy[ibin])
+            else:
+                y.append(0)
+                print("There was a not defined occupancy, using the value 0 to avoid a crash")
+            graph = TGraph(bins, x, y)
+
+        return graph
+
+    def rectangularPadIntegrateGraph(
+            self,
+            bins: int,
+            minPad: float,
+            maxPad: float,
+            padScale: float = 1,
+            doLog: bool = False,
+            xLen : float | None = None,
+            yLen : float | None = None,
+                                ):
+        from ROOT import TGraph  # type: ignore
+        from array import array
+
+        (padSize, occupancy) = self.rectangularPadIntegrateScan(bins, minPad, maxPad, doLog = doLog, xLen = xLen, yLen = yLen)
+        padSize = [pad*padScale for pad in padSize]
+
+        x, y = array( 'd' ), array( 'd' )
+        graph = TGraph()
+        for ibin in range(len(padSize)):
+            x.append(padSize[ibin])
+            if occupancy[ibin] is not None:
+                y.append(occupancy[ibin])
+            else:
+                y.append(0)
+                print("There was a not defined occupancy, using the value 0 to avoid a crash")
+            graph = TGraph(bins, x, y)
+
+        return graph
+
+    def rectangularPadOccupancy(
+            self,
+            minPadSize: float = 1e-6,
+            maxPadSize: float = 1e-2,
+            steps: int = 50,
+            doLog: bool = True,
+            lengthScale: float = 1.0e6,
+            pointStepping: int = 2,
+            xLen : float | None = None,
+            yLen : float | None = None,
+                           ):
+
+        from math import ceil, floor
+
+        pointsMinSize = ceil(minPadSize/self.xStep)*self.xStep
+        pointsBins = floor((maxPadSize - pointsMinSize)/(self.xStep*pointStepping)) + 1
+        pointsMaxSize = pointsMinSize + self.xStep * pointStepping * (pointsBins - 1)
+
+        uniformGraph   = self.rectangularPadPeakUniformGraph(steps, minPadSize, maxPadSize, padScale = lengthScale, doLog = doLog, xLen = xLen, yLen = yLen)
+        integrateGraph = self.rectangularPadIntegrateGraph(steps, minPadSize, maxPadSize, padScale = lengthScale, doLog = doLog, xLen = xLen, yLen = yLen)
+        pointsGraph    = self.rectangularPadIntegrateGraph(pointsBins, pointsMinSize, pointsMaxSize, padScale = lengthScale, xLen = xLen, yLen = yLen)
+
+        return {
+            'uniform': uniformGraph,
+            'integrate': integrateGraph,
+            'points': pointsGraph,
+        }
