@@ -70,7 +70,9 @@ class SensorPad:
                     maxX:float= defaultPadSize/2,
                     minY:float=-defaultPadSize/2,
                     maxY:float= defaultPadSize/2,
-                    extra:float=0 # Extra space is for considering the interpad distance when accounting doses
+                    extra:float=0, # Extra space is for considering the interpad distance when accounting doses
+                    extra_x:float|None=None,
+                    extra_y:float|None=None,
                 ):
         self.epochs = epochs
 
@@ -79,10 +81,15 @@ class SensorPad:
         self.minY = minY
         self.maxY = maxY
 
-        self.minX_extra = minX - extra
-        self.maxX_extra = maxX + extra
-        self.minY_extra = minY - extra
-        self.maxY_extra = maxY + extra
+        if extra_x is None:
+            extra_x = extra
+        if extra_y is None:
+            extra_y = extra
+
+        self.minX_extra = minX - extra_x
+        self.maxX_extra = maxX + extra_x
+        self.minY_extra = minY - extra_y
+        self.maxY_extra = maxY + extra_y
 
         self.doses = []
         self.doses_extra = []
