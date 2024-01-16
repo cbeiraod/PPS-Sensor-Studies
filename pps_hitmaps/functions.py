@@ -30,17 +30,28 @@ def occupancyToEventLossProbability(
         'occupancy': occupancy,
     }
 
+    for timeStep in allTimeSteps:
+        probability = eventLossProbDistrib(timeStep, occupancy)
+
+        retData["prob_timeStep{}".format(timeStep)] = probability
+
     return retData
 
 def occupancyGraphToEventLossProbability(
-        occupancy: ROOT.TGraph,
+        occupancyGraph: ROOT.TGraph,
         minTimeStep: int = 0,
         maxTimeStep: int = 400,
                                          ):
-    allTimeSteps = range(minTimeStep, maxTimeStep)
+    import ctypes
 
     length = []
     occupancy = []
+    xVal = ctypes.c_double(0.0)
+    yVal = ctypes.c_double(0.0)
+    for point in range(occupancyGraph.GetN()):
+        occupancyGraph.GetPoint(point, xVal, yVal)
+        length    += [xVal.value]
+        occupancy += [yVal.value]
 
     retData = occupancyToEventLossProbability(occupancy, minTimeStep = minTimeStep, maxTimeStep = maxTimeStep)
 
