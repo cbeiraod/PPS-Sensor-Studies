@@ -283,7 +283,10 @@ class PPSHitmap:
         from array import array
         from math import ceil
 
-        padCols = plotPadCols%maxCols
+        if plotPadCols < maxCols:
+            padCols = plotPadCols
+        else:
+            padCols = maxCols
         padRows = ceil(plotPadCols/float(maxCols))
 
         persistance = {}
