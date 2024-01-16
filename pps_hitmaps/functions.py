@@ -18,6 +18,20 @@ def eventLossProbDistrib(
 
     return lossProb
 
+def occupancyToEventLossProbability(
+        occupancy: list[float],
+        minTimeStep: int = 0,
+        maxTimeStep: int = 400,
+                                         ):
+    allTimeSteps = range(minTimeStep, maxTimeStep)
+
+    retData = {
+        'time_steps': allTimeSteps,
+        'occupancy': occupancy,
+    }
+
+    return retData
+
 def occupancyGraphToEventLossProbability(
         occupancy: ROOT.TGraph,
         minTimeStep: int = 0,
@@ -25,9 +39,11 @@ def occupancyGraphToEventLossProbability(
                                          ):
     allTimeSteps = range(minTimeStep, maxTimeStep)
 
-    retData = {
-        'length': [],
-        'occupancy': [],
-    }
+    length = []
+    occupancy = []
+
+    retData = occupancyToEventLossProbability(occupancy, minTimeStep = minTimeStep, maxTimeStep = maxTimeStep)
+
+    retData['length'] = length
 
     return retData
