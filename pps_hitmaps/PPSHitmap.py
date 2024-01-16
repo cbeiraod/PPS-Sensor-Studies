@@ -359,8 +359,8 @@ class PPSHitmap:
                     for i in range(nShift + 1):
                         xVal = round(self.xMin + xIdx*self.xStep, 6)
                         yVal = round(self.yMin + (yIdx - i*shiftIdx)*self.yStep, 6)
-                        print("xVal: {}; yVal: {}; nShift: {}".format(xVal,yVal,nShift))
-                        print(self.map[xVal].keys())
+                        #print("xVal: {}; yVal: {}; nShift: {}".format(xVal,yVal,nShift))
+                        #print(self.map[xVal].keys())
                         fluxMinus += self.map[xVal][yVal] * integratedLuminosity/(nShift+1)
                     yArrDown.append(fluxMinus)
 
