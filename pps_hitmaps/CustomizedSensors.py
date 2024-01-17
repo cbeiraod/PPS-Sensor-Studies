@@ -676,3 +676,50 @@ class TIProduction3Sensor(Sensor):
                     self.padVec += [SensorPad(epochs = len(shifts), minX=minX, maxX=maxX, minY=minY, maxY=maxY, extra=PadSpacing/2)]
 
         self.numPads = len(self.padVec)
+
+class RectangularPadSensor(Sensor):
+    def __init__(self, shifts:list = [], PadSize = 1.3, SmallPadSize = 1.3/3, PadSpacing = 0.1, GuardRing = 0.3, NumSmallerCols = 3):
+        """
+        PadSize - design size of the pads, neglecting the interpad distance
+        SmallPadSize - width of the pads in the columns with smaller pads
+        PadSpacing - the interpad distance
+        GuardRing - the size of the guard ring
+        NumSmallerCols - Number of columns with smaller pads
+        """
+        Sensor.__init__(self, shifts=shifts)
+
+        self.padSize = PadSize
+        self.smallPadSize = SmallPadSize
+        self.padSpacing = PadSpacing
+        self.guardRing = GuardRing
+        self.numSmallerCols = NumSmallerCols
+
+        SensorSize = PadSize*16 + 2*GuardRing - PadSpacing
+
+        self.minX =-SensorSize/2
+        self.maxX = SensorSize/2
+        self.minY =-SensorSize/2
+        self.maxY = SensorSize/2
+
+        SensitiveEdge = -PadSize*8
+
+        for x in range(16):
+            minX = SensitiveEdge + x*PadSize + PadSpacing/2
+            maxX = SensitiveEdge + (x+1)*PadSize - PadSpacing/2
+            for y in range(16):
+                extra_y = PadSpacing/2
+                usePadSize = PadSize - PadSpacing
+                if x < NumSmallerCols:
+                    extra_y = PadSpacing/2 + (PadSize - SmallPadSize)/2
+                    usePadSize = SmallPadSize
+
+                center_y = SensitiveEdge + (y + 0.5)*PadSize
+
+                minY = center_y - usePadSize/2
+                maxY = center_y + usePadSize/2
+
+                #minY = SensitiveEdge + y*PadSize + PadSpacing/2
+                #maxY = SensitiveEdge + (y+1)*PadSize - PadSpacing/2
+                self.padVec += [SensorPad(epochs = len(shifts), minX=minX, maxX=maxX, minY=minY, maxY=maxY, extra_x=PadSpacing/2, extra_y=extra_y)]
+
+        self.numPads = len(self.padVec)
