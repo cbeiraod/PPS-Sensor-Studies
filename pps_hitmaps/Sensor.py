@@ -79,6 +79,7 @@ class Sensor:
             raise RuntimeError("You must calculate the fluxes before retrieving the max occupancy")
 
         occupancy = []
+        pads = []
         for epoch in range(len(self.shifts)):
             padIdx = None
 
@@ -100,8 +101,9 @@ class Sensor:
                 occupancy += [self.padVec[padIdx].doses[epoch]["occupancy"]]
             else:
                 occupancy += [self.padVec[padIdx].doses_extra[epoch]["occupancy"]]
+            pads += [padIdx]
 
-        return occupancy
+        return (occupancy, pads)
 
     def plotOccupancy(self, usePadSpacing=True):
         if not self.hasFlux:
