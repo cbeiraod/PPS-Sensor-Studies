@@ -64,6 +64,10 @@ class SensorPad:
     maxY_extra = FloatField()
     #doses_extra = FloatListField()
 
+    @property
+    def area(self):
+        return (self.maxX - self.minX) * (self.maxY - self.minY)
+
     def __init__(self,
                     epochs:int=1,
                     minX:float=-defaultPadSize/2,
