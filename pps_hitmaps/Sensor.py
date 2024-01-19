@@ -53,6 +53,7 @@ class Sensor:
         self.maxY = 0
 
         self.hasFlux = False
+        self._hist_stepping = None
 
     def setShifts(self, shifts:list):
         self.shifts = shifts
@@ -71,6 +72,7 @@ class Sensor:
             pad.calculateFlux(self.shifts, hitmap) # Remember PPSHitmap is in m, sensor is in mm
 
         self.hasFlux = True
+        self._hist_stepping = hitmap.xStep * hitmap.yStep *1000 *1000  ## Convert m to mm
         # TODO: this function needs to be called before some of the others make sense... add a check
         # Also, modifying the shifts, invalidates previous flux call, so double check that too
 
@@ -104,6 +106,151 @@ class Sensor:
             pads += [padIdx]
 
         return (occupancy, pads)
+
+    def plotSensorQuantity(self, quantity: str, margin: float = 0.8):
+        if not self.hasFlux:
+            raise RuntimeError("You must calculate the fluxes before retrieving the max occupancy")
+
+        quantity_options = {
+            'flux': {
+                'zTitle': '#Phi [p / (cm^{2} fb^{-1})]',
+                'title': 'Average Flux',
+            },
+            'protons': {
+                'zTitle': '#Phi [p / pad]',
+                'title': 'Flux per pad',
+            },
+            'occupancy': {
+                'zTitle': '#mu [p / BX]',
+                'title': 'Occupancy',
+            },
+            'loss_probability': {
+                'zTitle': 'p',
+                'title': 'Loss Probability',
+            },
+        }
+        if quantity not in quantity_options:
+            raise RuntimeError("You must ask to plot a valid quantity")
+
+        from ROOT import TCanvas, TH2Poly, TLine, kRed, kBlack, kFALSE
+        from array import array
+        from math import ceil
+        from .functions import calcEventLossProb
+
+        numTPads = len(self.shifts)
+        if numTPads <= 3:
+            padX = numTPads
+            padY = 1
+        elif numTPads <= 6:
+            padX = ceil(numTPads/2.)
+            padY = 2
+        else:
+            padX = 3
+            padY = ceil(numTPads/3.)
+
+        persistance = {}
+
+        canv = TCanvas(f"sensor_{quantity}", f"Sensor {quantity}", padX * 1300, padY * 1300)
+        canv.Divide(padX, padY)
+
+        base_hist = TH2Poly("base_hist", "base_hist", self.minX-margin, self.maxX+margin, self.minY-margin, self.maxY+margin)
+        base_hist.SetStats(kFALSE)
+        base_hist.GetXaxis().SetTitle( "x [mm]" )
+        base_hist.GetYaxis().SetTitle( "y [mm]" )
+        base_hist.GetZaxis().SetTitle( quantity_options[quantity]['zTitle'] )
+        base_hist.GetXaxis().SetTitleOffset(0.9)
+        base_hist.GetYaxis().SetTitleOffset(1.2)
+        base_hist.GetZaxis().SetTitleOffset(1.6)
+        base_hist.GetYaxis().SetLabelOffset(0.01)
+
+        sensorLines = {}
+        sensorLines["Left"]   = TLine( self.minX, self.minY,
+                                       self.minX, self.maxY)
+        sensorLines["Right"]  = TLine( self.maxX, self.minY,
+                                       self.maxX, self.maxY)
+        sensorLines["Top"]    = TLine( self.minX, self.minY,
+                                       self.maxX, self.minY)
+        sensorLines["Bottom"] = TLine( self.minX, self.maxY,
+                                       self.maxX, self.maxY)
+        for key in sensorLines:
+            sensorLines[key].SetLineColor(kRed)
+
+        padID = 0
+        for pad in self.padVec:
+            minX = pad.minX
+            maxX = pad.maxX
+            minY = pad.minY
+            maxY = pad.maxY
+
+            sensorLines[f"pad{padID}_Left"]   = TLine( minX, minY, minX, maxY)
+            sensorLines[f"pad{padID}_Right"]  = TLine( maxX, minY, maxX, maxY)
+            sensorLines[f"pad{padID}_Top"]    = TLine( minX, minY, maxX, minY)
+            sensorLines[f"pad{padID}_Bottom"] = TLine( minX, maxY, maxX, maxY)
+
+            sensorLines[f"pad{padID}_Left"].SetLineColor(kBlack)
+            sensorLines[f"pad{padID}_Right"].SetLineColor(kBlack)
+            sensorLines[f"pad{padID}_Top"].SetLineColor(kBlack)
+            sensorLines[f"pad{padID}_Bottom"].SetLineColor(kBlack)
+
+            xVals = array( 'd' )
+            yVals = array( 'd' )
+            xVals.append(minX)
+            yVals.append(minY)
+            xVals.append(minX)
+            yVals.append(maxY)
+            xVals.append(maxX)
+            yVals.append(maxY)
+            xVals.append(maxX)
+            yVals.append(minY)
+            base_hist.AddBin(4, xVals, yVals)
+
+            padID += 1
+
+        histograms = {}
+        idx = 0
+        for idx in range(numTPads):
+            idx += 1
+            if numTPads > 1:
+                pad = canv.cd(idx)
+            else:
+                pad = canv
+
+            pad.SetTicks()
+            #pad.SetLogz()
+            pad.SetLeftMargin(0.11)
+            pad.SetRightMargin(0.16)
+            pad.SetTopMargin(0.07)
+            pad.SetBottomMargin(0.14)
+
+            this_hist = base_hist.Clone(f'{quantity}_pos_{idx-1}')
+            this_hist.SetTitle(f"{quantity_options[quantity]['title']} - Position {idx-1}")
+
+            padID = 0
+            for pad in self.padVec:
+                try:
+                    loss_prob = calcEventLossProb(0, pad.doses[idx - 1]['occupancy'])
+                except ZeroDivisionError as e:
+                    loss_prob = 0
+                quantity_values = {
+                    'flux': pad.doses[idx - 1]['totalFlux']/(pad.area / self._hist_stepping),
+                    'protons': pad.doses[idx - 1]['totalFlux'] * pad.doses[idx - 1]['occupancyNorm'],
+                    'occupancy': pad.doses[idx - 1]['occupancy'],
+                    'loss_probability': loss_prob,
+                }
+                this_hist.SetBinContent(padID + 1, quantity_values[quantity])
+                padID += 1
+
+            this_hist.Draw("colz")
+            histograms[f'pos_{idx-1}'] = this_hist
+
+            for key in sensorLines:
+                sensorLines[key].Draw("same")
+
+        persistance["sensorLines"] = sensorLines
+        persistance["histograms"] = histograms
+        persistance["canvas"] = canv
+
+        return (canv, persistance)
 
     def plotOccupancy(self, usePadSpacing=True):
         if not self.hasFlux:
