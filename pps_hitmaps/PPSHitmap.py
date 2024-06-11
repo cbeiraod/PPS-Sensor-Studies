@@ -22,6 +22,8 @@
 
 from __future__ import annotations
 
+valid_betastar = [0.15, 0.20, 0.50]
+
 class PPSHitmap:
     map: dict
     maxFluence: dict
@@ -55,7 +57,7 @@ class PPSHitmap:
         self.yStep = yStep
 
         self.betastar = betastar
-        if self.betastar != 0.15:
+        if self.betastar not in valid_betastar:
             raise Exception("Betastar {} not implemented".format(self.betastar)) # Copy from Mario
 
         self.verbose = verbose
