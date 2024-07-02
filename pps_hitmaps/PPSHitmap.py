@@ -27,6 +27,9 @@ valid_betastar = [0.15, 0.20, 0.50]
 class PPSHitmap:
     map: dict
     maxFluence: dict
+    # Convert Phi 1fb-1 to Phi BX - multiply by 1.6 x 10^-12 Phi in units of particles/cm^2 Occupancy in units
+    # of particles
+    fluenceConversion: float = 1.6E-12
     def __init__(self,
                  filename: str,
                  station: str,
@@ -201,7 +204,7 @@ class PPSHitmap:
         # Convert Phi 1fb-1 to Phi BX - multiply by 1.6 x 10^-12 Phi in units of particles/cm^2 Occupancy in units
         # of particles
         if self.maxFluence is not None:
-            return self.maxFluence["fluence"] * 1.6E-12 * (xLen * yLen) * 1.0E4
+            return self.maxFluence["fluence"] * self.fluenceConversion * (xLen * yLen) * 1.0E4
         else:
             return None
 
@@ -251,7 +254,7 @@ class PPSHitmap:
                     contributionY -= (bottomPad - bottom)/self.yStep
                 fluence += self.map[xVal][yVal] * contributionX * contributionY
 
-        occupancy = fluence * 1.6E-12 * (self.xStep * self.yStep) * 1.0E4
+        occupancy = fluence * self.fluenceConversion * (self.xStep * self.yStep) * 1.0E4
         return occupancy
 
     def plotShifts(
