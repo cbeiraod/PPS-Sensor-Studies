@@ -66,6 +66,8 @@ class PPSHitmap:
         self.verbose = verbose
 
         self.addBackgroundFlux = addBackgroundFlux
+        if self.addBackgroundFlux is None:
+            self.addBackgroundFlux = 0
 
         if self.physics and self.calib:
             raise Exception("File {} has both physics and calibration set to true".format(self.filename))
@@ -252,7 +254,10 @@ class PPSHitmap:
                     contributionY -= (top - topPad)/self.yStep
                 if bottom < bottomPad:
                     contributionY -= (bottomPad - bottom)/self.yStep
-                fluence += self.map[xVal][yVal] * contributionX * contributionY
+                if xVal not in self.map or yVal not in self.map[xVal]:
+                    fluence += self.addBackgroundFlux * contributionX * contributionY
+                else:
+                    fluence += self.map[xVal][yVal] * contributionX * contributionY
 
         occupancy = fluence * self.fluenceConversion * (self.xStep * self.yStep) * 1.0E4
         return occupancy
@@ -350,23 +355,30 @@ class PPSHitmap:
                         index = -int(nShift/2) + i
                         xVal = round(self.xMin + xIdx*self.xStep, 6)
                         yVal = round(self.yMin + (yIdx + index*shiftIdx)*self.yStep, 6)
-                        fluxMed += self.map[xVal][yVal] * integratedLuminosity/(nShift+1)
+                        if xVal not in self.map or yVal not in self.map[xVal]:
+                            fluxMed += self.addBackgroundFlux * integratedLuminosity/(nShift+1)
+                        else:
+                            fluxMed += self.map[xVal][yVal] * integratedLuminosity/(nShift+1)
                     yArrMed.append(fluxMed)
 
                     fluxPlus = 0
                     for i in range(nShift + 1):
                         xVal = round(self.xMin + xIdx*self.xStep, 6)
                         yVal = round(self.yMin + (yIdx + i*shiftIdx)*self.yStep, 6)
-                        fluxPlus += self.map[xVal][yVal] * integratedLuminosity/(nShift+1)
+                        if xVal not in self.map or yVal not in self.map[xVal]:
+                            fluxPlus += self.addBackgroundFlux * integratedLuminosity/(nShift+1)
+                        else:
+                            fluxPlus += self.map[xVal][yVal] * integratedLuminosity/(nShift+1)
                     yArrUp.append(fluxPlus)
 
                     fluxMinus = 0
                     for i in range(nShift + 1):
                         xVal = round(self.xMin + xIdx*self.xStep, 6)
                         yVal = round(self.yMin + (yIdx - i*shiftIdx)*self.yStep, 6)
-                        #print("xVal: {}; yVal: {}; nShift: {}".format(xVal,yVal,nShift))
-                        #print(self.map[xVal].keys())
-                        fluxMinus += self.map[xVal][yVal] * integratedLuminosity/(nShift+1)
+                        if xVal not in self.map or yVal not in self.map[xVal]:
+                            fluxMinus += self.addBackgroundFlux * integratedLuminosity/(nShift+1)
+                        else:
+                            fluxMinus += self.map[xVal][yVal] * integratedLuminosity/(nShift+1)
                     yArrDown.append(fluxMinus)
 
                     if minFlux < 0:
