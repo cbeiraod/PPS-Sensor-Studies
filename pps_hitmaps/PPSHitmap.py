@@ -44,7 +44,9 @@ class PPSHitmap:
                  yStep: float = 0.00005, # in m
                  betastar: float = 0.15,
                  verbose: bool = False,
-                 addBackgroundFlux: float | None = None
+                 addBackgroundFlux: float | None = None,
+                 peakLuminosity: float = 5E34, # in cm^-2 s^-1
+                 collidingBunches: int = 2773, # Found this number so that the defaults match previous results
                 ):
         self.filename = filename
         self.station = station
@@ -84,6 +86,13 @@ class PPSHitmap:
         ## Missing optics data in order to be able to compute detector edges...
         #self.detectorEdge = self.nsigma * sigma_x_15[i] + self.xmargin
         self.detectorEdge = approximateDetectorEdge/1000 # save the number in m for internal consistency
+
+        self.fluenceConversion = peakLuminosity/(40000000.0 * (float(collidingBunches)/3550.0))
+        # convert to fb
+        #  fb = 10^-15 barn
+        #  one barn = 10^-28 m^2
+        #  m^2 = 10^4 cm^2
+        self.fluenceConversion = self.fluenceConversion * 10**(-28 +4 -15)
 
     def validate(self):
         self._checkMap()
