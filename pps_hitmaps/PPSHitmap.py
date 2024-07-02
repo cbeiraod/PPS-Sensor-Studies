@@ -67,9 +67,10 @@ class PPSHitmap:
 
         self.verbose = verbose
 
-        self.addBackgroundFlux = addBackgroundFlux
-        if self.addBackgroundFlux is None:
+        if not (isinstance(addBackgroundFlux, int) or isinstance(addBackgroundFlux, float)):
             self.addBackgroundFlux = 0
+        else:
+            self.addBackgroundFlux = addBackgroundFlux
 
         if self.physics and self.calib:
             raise Exception("File {} has both physics and calibration set to true".format(self.filename))
