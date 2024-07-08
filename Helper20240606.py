@@ -150,3 +150,36 @@ def plotShiftsOnFluxmap(sensor, positions, hitmap, histogram, base_name, title):
         persistance[f"sensorLines_shift{shift_idx}"] = sensorLines
 
     return canv, persistance
+
+def plotOccupancy(sensor, positions, hitmap, name, minV, maxV):
+    ROOT.gStyle.SetPalette()
+
+    num_sensors = len(positions)
+
+    edge = hitmap.detectorEdge * 1000 # Convert to mm for drawing
+    xSensorSize = sensor.maxX - sensor.minX
+    offsetX = edge + xSensorSize/2
+
+    canvas = []
+    persistance = []
+
+    for sensor_idx in range(num_sensors):
+        shifted_positions = [
+                (offsetX, offsetY)
+                for offsetY in positions[sensor_idx]
+            ]
+
+        sensor.setShifts(shifted_positions)
+        sensor.calculateFlux(hitmap)
+
+        c, p = sensor.plotSensorQuantity("occupancy", minV = minV, maxV = maxV)
+        c.SetName(c.GetName() + name + f"_Sensor{sensor_idx}")
+        canvas.append(c)
+        persistance.append(p)
+
+        #c, p = sensor.plotSensorQuantity("loss_probability")
+        #c.SetName(c.GetName() + f"_{angle_dir}-{angle}urad-{int(beta*100)}cm_Sensor{sensor_idx}")
+        #canvas.append(c)
+        #persistance.append(p)
+
+    return canvas, persistance
