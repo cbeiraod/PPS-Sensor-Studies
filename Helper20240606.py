@@ -21,21 +21,21 @@ detector_edge = {
     },
 }
 
+angle_beta = [
+    ("horizontal", 125, 0.15),  # Angle dir, angle in urad, betastar in m
+    ("horizontal", 125, 0.50),
+    ("horizontal", 250, 0.15),
+    ("horizontal", 250, 0.50),
+    ("vertical", 125, 0.20),
+    ("vertical", 125, 0.50),
+    ("vertical", 250, 0.20),
+    ("vertical", 250, 0.50),
+]
+
 def loadHitmaps(station, noBackgroundFlux, backgroundFlux):
     base_dir = Path("./2024-06-06-Hitmaps")
     vertical_dir   = base_dir/"maps-vertical"
     horizontal_dir = base_dir/"maps-horizontal"
-
-    angle_beta = [
-        ("horizontal", 125, 0.15),  # Angle dir, angle in urad, betastar in m
-        ("horizontal", 125, 0.50),
-        ("horizontal", 250, 0.15),
-        ("horizontal", 250, 0.50),
-        ("vertical", 125, 0.20),
-        ("vertical", 125, 0.50),
-        ("vertical", 250, 0.20),
-        ("vertical", 250, 0.50),
-    ]
 
     hitmaps = {}
 
