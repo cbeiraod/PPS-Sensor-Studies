@@ -19,6 +19,13 @@ detector_edge = {
     },
 }
 
+def getNominalPositions(hitmaps, xSensorSize):
+    nominal_positions = {}
+    for key in hitmaps:
+        offsetX = hitmaps[key].detectorEdge*1000 + xSensorSize/2
+        offsetY = hitmaps[key].maxFluence["y"]*1000
+        nominal_positions[key] = (offsetX, offsetY)
+
 def computeShifts(nominalSensorCenters, shift_info):
     offsets = []
 
