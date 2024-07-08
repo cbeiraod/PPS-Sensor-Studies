@@ -60,6 +60,39 @@ def getAdjustedPositions(nominal_positions, station):
         pass
     return adjusted_positions
 
+def getNeededShifts(station):
+    needed_shifts = {}
+
+    if station == "196":
+        needed_shifts = {   # (number of shifts, total shift amount)
+            'vertical': (0, None),   # No shift needed
+            'horizontal': (0, None),
+            'vertical-125urad': (0, None),
+            'vertical-250urad': (0, None),
+            'horizontal-125urad': (0, None),
+            'horizontal-250urad': (0, None),
+        }
+    elif station == "220":
+        needed_shifts = {
+            'vertical': (10, 5*1.3),
+            'horizontal': (4, 2*1.3),
+            'vertical-125urad': (10, 5*1.3),
+            'vertical-250urad': (10, 5*1.3),
+            'horizontal-125urad': (4, 2*1.3),
+            'horizontal-250urad': (2, 1.3),
+        }
+    elif station == "234":
+        needed_shifts = {
+            'vertical': (16, 4*1.3),
+            'horizontal': (16, 4*1.3),
+            'vertical-125urad': (16, 4*1.3),
+            'vertical-250urad': (12, 6*1.3),
+            'horizontal-125urad': (16, 4*1.3),
+            'horizontal-250urad': (10, 5*1.3),
+        }
+
+    return needed_shifts
+
 def computeShifts(nominalSensorCenters, shift_info):
     offsets = []
 
