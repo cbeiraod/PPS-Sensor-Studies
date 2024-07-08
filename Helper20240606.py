@@ -96,6 +96,8 @@ def getNominalPositions(hitmaps, xSensorSize):
         offsetY = hitmaps[key].maxFluence["y"]*1000
         nominal_positions[key] = (offsetX, offsetY)
 
+    return nominal_positions
+
 def getAdjustedPositions(nominal_positions, station):
     adjusted_positions = {}
 
