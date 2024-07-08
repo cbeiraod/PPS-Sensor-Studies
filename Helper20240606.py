@@ -1,5 +1,7 @@
 import ROOT
 from math import ceil
+from pathlib import Path
+import pps_hitmaps
 
 detector_edge = {
     "196": {
@@ -18,6 +20,74 @@ detector_edge = {
         0.50: 2.025,
     },
 }
+
+def loadHitmaps(station, noBackgroundFlux, backgroundFlux):
+    base_dir = Path("./2024-06-06-Hitmaps")
+    vertical_dir   = base_dir/"maps-vertical"
+    horizontal_dir = base_dir/"maps-horizontal"
+
+    angle_beta = [
+        ("horizontal", 125, 0.15),  # Angle dir, angle in urad, betastar in m
+        ("horizontal", 125, 0.50),
+        ("horizontal", 250, 0.15),
+        ("horizontal", 250, 0.50),
+        ("vertical", 125, 0.20),
+        ("vertical", 125, 0.50),
+        ("vertical", 250, 0.20),
+        ("vertical", 250, 0.50),
+    ]
+
+    hitmaps = {}
+
+    for angle_dir, angle, beta in angle_beta:
+        dir_key = "v"
+        if angle_dir == "horizontal":
+            dir_key = "h"
+
+        hitmap_key = f"{angle_dir}-{angle}urad-{int(beta*100)}cm"
+
+        if dir_key == "v":
+            directory = vertical_dir
+        else:
+            directory = horizontal_dir
+
+        # Find the hitmap file
+        hitmap_files = []
+        for file in directory.glob(f"map-{dir_key}{angle}urad-{int(beta*100)}cm-physics-sd+el-{station}-nodetcut_2024*"):
+            hitmap_files += [file]
+        if len(hitmap_files) == 0:
+            print(f"Could not find a hitmap file for key {hitmap_key}")
+            continue
+        if len(hitmap_files) > 1:
+            print(f"Found more than one hitmap file for key {hitmap_key}")
+            continue
+
+        hitmap_file = hitmap_files[0]
+
+        additional_params = {
+            'betastar': beta,
+            'verbose': False,
+        }
+        if station == "234":
+            additional_params['yStep'] = 0.000025
+            additional_params['xStep'] = 0.000025
+
+        hitmaps[hitmap_key] = pps_hitmaps.PPSHitmap(
+            hitmap_file,
+            station,
+            detector_edge[station][beta],
+            addBackgroundFlux = noBackgroundFlux,
+            **additional_params,
+        )
+        hitmaps[hitmap_key+"-background"] = pps_hitmaps.PPSHitmap(
+            hitmap_file,
+            station,
+            detector_edge[station][beta],
+            addBackgroundFlux = backgroundFlux,
+            **additional_params,
+        )
+
+    return hitmaps
 
 def getNominalPositions(hitmaps, xSensorSize):
     nominal_positions = {}
