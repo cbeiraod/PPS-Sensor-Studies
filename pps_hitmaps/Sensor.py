@@ -26,6 +26,14 @@ from .ClassFields import *
 from .PPSHitmap import PPSHitmap
 from .SensorPad import SensorPad
 
+import pandas
+import numpy
+import hist
+import matplotlib
+import matplotlib.pyplot as plt
+import mplhep
+from math import ceil
+
 def calcLossProb(deadtime, occupancy, bunchSpacing=25.):
     from math import exp, floor
     timeStep = floor(deadtime/float(bunchSpacing))
@@ -107,7 +115,7 @@ class Sensor:
 
         return (occupancy, pads)
 
-    def plotSensorQuantity(self, quantity: str, margin: float = 0.8):
+    def plotSensorQuantity(self, quantity: str, margin: float = 0.8, minV = None, maxV = None, logz = False):
         if not self.hasFlux:
             raise RuntimeError("You must calculate the fluxes before retrieving the max occupancy")
 
@@ -162,6 +170,9 @@ class Sensor:
         base_hist.GetYaxis().SetTitleOffset(1.2)
         base_hist.GetZaxis().SetTitleOffset(1.6)
         base_hist.GetYaxis().SetLabelOffset(0.01)
+        if minV is not None and maxV is not None:
+            base_hist.SetMinimum(minV)
+            base_hist.SetMaximum(maxV)
 
         sensorLines = {}
         sensorLines["Left"]   = TLine( self.minX, self.minY,
@@ -221,6 +232,8 @@ class Sensor:
             pad.SetRightMargin(0.16)
             pad.SetTopMargin(0.07)
             pad.SetBottomMargin(0.14)
+            if logz:
+                pad.SetLogz()
 
             this_hist = base_hist.Clone(f'{quantity}_pos_{idx-1}')
             this_hist.SetTitle(f"{quantity_options[quantity]['title']} - Position {idx-1}")
@@ -406,8 +419,12 @@ class Sensor:
         import matplotlib.pyplot as plt
         import matplotlib.patches as patches
 
+        plt.style.use(mplhep.style.CMS)
+
         fig = plt.figure(figsize=(9, 9))
         ax1 = plt.subplot2grid((1,1),(0,0))
+
+        mplhep.cms.text(loc=0, ax=ax1, text="PPS2 Preliminary", fontsize=18)
 
         if doSquare:
             minV = min(self.minX-margin, self.minY-margin)
