@@ -26,6 +26,40 @@ def getNominalPositions(hitmaps, xSensorSize):
         offsetY = hitmaps[key].maxFluence["y"]*1000
         nominal_positions[key] = (offsetX, offsetY)
 
+def getAdjustedPositions(nominal_positions, station):
+    adjusted_positions = {}
+
+    position_keys = [
+        ("vertical", 250, (0.50, 0.20)),
+        ("vertical", 125, (0.50, 0.20)),
+        ("horizontal", 250, (0.50, 0.15)),
+        ("horizontal", 125, (0.50, 0.15)),
+    ]
+    for angle_dir, angle, betas in position_keys:
+        position_key = f"{angle_dir}-{angle}urad"
+
+        offsetX = 0
+        offsetY = 0
+        count = 0
+        for beta in betas:
+            hitmap_key = f"{angle_dir}-{angle}urad-{int(beta*100)}cm"
+            count += 1
+            offsets = nominal_positions[hitmap_key]
+
+            offsetX += offsets[0]
+            offsetY += offsets[1]
+
+        adjusted_positions[position_key] = (offsetX/count, offsetY/count)
+
+    if station == "196":
+        adjusted_positions['vertical-250urad'] = (19.558, -10.175 - 3*1.3)
+    elif station == "220":
+        adjusted_positions['vertical-250urad'] = (19.558, -4.95 - 3*1.3)
+        adjusted_positions['vertical-125urad'] = (19.558, -2.4 - 2*1.3)
+    elif station == "234":
+        pass
+    return adjusted_positions
+
 def computeShifts(nominalSensorCenters, shift_info):
     offsets = []
 
