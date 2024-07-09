@@ -63,6 +63,118 @@ class Sensor:
         self.hasFlux = False
         self._hist_stepping = None
 
+    def _getAllPadCategories(self):
+        return ["all"]
+
+    def _getPadCategory(self, padID):
+        return "all"
+
+    def simulateToys(self, numToys: int = 1000, seed: int | None = None):
+        rng = numpy.random.default_rng(seed = seed)
+        toyCache = []
+
+        all_categories = self._getAllPadCategories()
+        extra_cols = []
+        for cat in all_categories:
+            extra_cols += ["event_loss_"+cat, "active_pads_"+cat, "sensor_occupancy_"+cat, "bit_length_"+cat]
+
+        for epoch in range(len(self.shifts)):
+            data = []
+            for toyIdx in range(numToys):
+                extra_col_data = []
+                hits = []
+                hits_per_cat = {}
+                for cat in all_categories:
+                    hits_per_cat[cat] = []
+
+                for padID in range(len(self.padVec)):
+                    pad = self.padVec[padID]
+                    pad_hits = rng.poisson(pad.doses[epoch]["occupancy"])
+                    hits += [pad_hits]
+                    pad_cat = self._getPadCategory(padID)
+                    hits_per_cat[pad_cat] += [pad_hits]
+
+                singleHits = [1 if hit >= 1 else 0 for hit in hits]
+                eventLoss = any([True if hit >= 2 else False for hit in hits])
+                activePads = sum(singleHits)
+                sensorOccupancy = float(activePads)/len(self.padVec)
+                bitLength = 40 * (activePads + 2)  # We add 2 because each event needs a header and a trailer and each data word is 40 bits
+
+                for cat in all_categories:
+                    catSingleHits = [1 if hit >= 1 else 0 for hit in hits_per_cat[cat]]
+                    catEventLoss = any([True if hit >= 2 else False for hit in hits_per_cat[cat]])
+                    catActivePads = sum(catSingleHits)
+                    catSensorOccupancy = float(catActivePads)/len(hits_per_cat[cat])
+                    catBitLength = 40 * (catActivePads + 2)
+
+                    extra_col_data += [catEventLoss, catActivePads, catSensorOccupancy*100, catBitLength]
+
+                data += [[toyIdx, f'{hits}'[1:-1], eventLoss, activePads, sensorOccupancy*100, bitLength]+extra_col_data]
+            toyCache += [pandas.DataFrame(data, columns=['event', 'hitmap', 'event_loss', 'active_pads', 'sensor_occupancy', 'bit_length']+extra_cols)]
+            del data
+
+        return toyCache
+
+    def plotToyInfo(self, toyCache: list[pandas.DataFrame], column: str, minX: float, maxX: float, bins: int, title: str, label: str = None):
+        plt.style.use(mplhep.style.CMS)
+
+        numTPads = len(self.shifts)
+
+        if numTPads <= 3:
+            nCols = numTPads
+            nRows = 1
+        elif numTPads <= 6:
+            nCols = ceil(numTPads/2.)
+            nRows = 2
+        else:
+            nCols = 3
+            nRows = ceil(numTPads/3.)
+
+        #fig, axes = plt.subplots(nRows, nCols, figsize=(nRows*10, nCols*10))
+        fig = plt.figure(dpi=100, figsize=(nRows*10, nCols*10))
+        gs = fig.add_gridspec(nRows, nCols)
+
+        for i, plot_info in enumerate(gs):
+            if i >= len(self.shifts):
+                break
+            ax = fig.add_subplot(plot_info)
+            mplhep.cms.text(loc=0, ax=ax, text="PPS2 Preliminary", fontsize=18)
+
+            histogram = hist.Hist.new.Reg(bins, minX, maxX, name=column, label=label).Double()
+            histogram.fill(toyCache[i][column])
+
+            ax.set_title(title + f" - Position {i}", loc="right", size=16)
+            histogram.plot1d(ax=ax, lw=2)
+            #histogram.project(column)[:].plot1d(ax=ax, lw=2)
+
+        plt.tight_layout()
+
+        return fig
+
+    def plotToyActivePads(self, numToys: int = 1000, toyCache: list[pandas.DataFrame] | None = None):
+        if toyCache is not None:
+            numToys = len(toyCache[0])
+        else:
+            toyCache = self.simulateToys(numToys = numToys)
+
+        return self.plotToyInfo(toyCache, "active_pads", 0, 257, 257, "Active Pads", label = "# Active Pads")
+
+    def plotToySensorOccupancy(self, numToys: int = 1000, toyCache: list[pandas.DataFrame] | None = None):
+        if toyCache is not None:
+            numToys = len(toyCache[0])
+        else:
+            toyCache = self.simulateToys(numToys = numToys)
+
+        return self.plotToyInfo(toyCache, "sensor_occupancy", 0, 100, 100, "Sensor Occupancy", label = "Sensor Pad Occupancy [%]")
+
+    def plotToyEventSize(self, numToys: int = 1000, toyCache: list[pandas.DataFrame] | None = None):
+        if toyCache is not None:
+            numToys = len(toyCache[0])
+        else:
+            toyCache = self.simulateToys(numToys = numToys)
+
+        return self.plotToyInfo(toyCache, "bit_length", 0, 4000, 100, "Event Size", label = "Event Bit Length")
+
     def setShifts(self, shifts:list):
         self.shifts = shifts
         for pad in self.padVec:
