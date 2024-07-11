@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import ROOT
 from math import exp
-from __future__ import annotations
 
 def calcEventLossProb(
         timeStep: float,
