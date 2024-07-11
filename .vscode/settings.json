@@ -1,4 +1,7 @@
 {
     "python.analysis.typeCheckingMode": "basic",
-    "python.terminal.activateEnvironment": true
+    "python.terminal.activateEnvironment": true,
+    "python.analysis.extraPaths": [
+        "/usr/local/Cellar/root/6.32.02/lib/root"
+    ]
 }
