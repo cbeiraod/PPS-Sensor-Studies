@@ -48,6 +48,15 @@ class SimpleETLSensor(Sensor):
 
         self.numPads = len(self.padVec)
 
+    def _getAllPadCategories(self):
+        return ["left", "right"]
+
+    def _getPadCategory(self, padID):
+        if self.padVec[padID].maxX < 0:
+            return "left"
+        else:
+            return "right"
+
 class RealisticETLSensor(Sensor):
     def __init__(self, shifts:list = [], PadSize = 1.3, PadSpacing = 0.1, GuardRing = 0.3):
         """
@@ -79,6 +88,15 @@ class RealisticETLSensor(Sensor):
                 self.padVec += [SensorPad(epochs = len(shifts), minX=minX, maxX=maxX, minY=minY, maxY=maxY, extra=PadSpacing/2)]
 
         self.numPads = len(self.padVec)
+
+    def _getAllPadCategories(self):
+        return ["left", "right"]
+
+    def _getPadCategory(self, padID):
+        if self.padVec[padID].maxX < 0:
+            return "left"
+        else:
+            return "right"
 
 class PPSHybrid1Sensor(Sensor):
     def __init__(self, shifts:list = [], PadSize = 1.3, PadSpacing = 0.1, GuardRing = 0.3):
@@ -120,6 +138,15 @@ class PPSHybrid1Sensor(Sensor):
 
         self.numPads = len(self.padVec)
 
+    def _getAllPadCategories(self):
+        return ["left", "right"]
+
+    def _getPadCategory(self, padID):
+        if self.padVec[padID].maxX < 0:
+            return "left"
+        else:
+            return "right"
+
 class PPSHybrid2Sensor(Sensor):
     def __init__(self, shifts:list = [], PadSize = 1.3, PadSpacing = 0.1, GuardRing = 0.3):
         """
@@ -160,6 +187,15 @@ class PPSHybrid2Sensor(Sensor):
 
         self.numPads = len(self.padVec)
 
+    def _getAllPadCategories(self):
+        return ["left", "right"]
+
+    def _getPadCategory(self, padID):
+        if self.padVec[padID].maxX < 0:
+            return "left"
+        else:
+            return "right"
+
 class PPSHybrid3Sensor(Sensor):
     def __init__(self, shifts:list = [], PadSize = 1.3, PadSpacing = 0.1, GuardRing = 0.3):
         """
@@ -199,6 +235,15 @@ class PPSHybrid3Sensor(Sensor):
                     self.padVec += [SensorPad(epochs = len(shifts), minX=minX, maxX=maxX, minY=minY, maxY=maxY, extra=PadSpacing/2)]
 
         self.numPads = len(self.padVec)
+
+    def _getAllPadCategories(self):
+        return ["left", "right"]
+
+    def _getPadCategory(self, padID):
+        if self.padVec[padID].maxX < 0:
+            return "left"
+        else:
+            return "right"
 
 class PPSHybrid4Sensor(Sensor):
     def __init__(self, shifts:list = [], PadSize = 1.3, PadSpacing = 0.1, GuardRing = 0.3):
@@ -243,6 +288,15 @@ class PPSHybrid4Sensor(Sensor):
 
         self.numPads = len(self.padVec)
 
+    def _getAllPadCategories(self):
+        return ["left", "right"]
+
+    def _getPadCategory(self, padID):
+        if self.padVec[padID].maxX < 0:
+            return "left"
+        else:
+            return "right"
+
 class PPSHybrid5Sensor(Sensor):
     def __init__(self, shifts:list = [], PadSize = 1.3, PadSpacing = 0.1, GuardRing = 0.3):
         """
@@ -285,6 +339,15 @@ class PPSHybrid5Sensor(Sensor):
                     self.padVec += [SensorPad(epochs = len(shifts), minX=minX, maxX=maxX, minY=minY, maxY=maxY, extra=PadSpacing/2)]
 
         self.numPads = len(self.padVec)
+
+    def _getAllPadCategories(self):
+        return ["left", "right"]
+
+    def _getPadCategory(self, padID):
+        if self.padVec[padID].maxX < 0:
+            return "left"
+        else:
+            return "right"
 
 class PPSHybrid6Sensor(Sensor):
     def __init__(self, shifts:list = [], PadSize = 1.3, PadSpacing = 0.1, GuardRing = 0.3):
@@ -332,6 +395,15 @@ class PPSHybrid6Sensor(Sensor):
 
         self.numPads = len(self.padVec)
 
+    def _getAllPadCategories(self):
+        return ["left", "right"]
+
+    def _getPadCategory(self, padID):
+        if self.padVec[padID].maxX < 0:
+            return "left"
+        else:
+            return "right"
+
 class PPSHybrid7Sensor(Sensor):
     def __init__(self, shifts:list = [], PadSize = 1.3, PadSpacing = 0.1, GuardRing = 0.3):
         """
@@ -377,6 +449,15 @@ class PPSHybrid7Sensor(Sensor):
                     self.padVec += [SensorPad(epochs = len(shifts), minX=minX, maxX=maxX, minY=minY, maxY=maxY, extra=PadSpacing/2)]
 
         self.numPads = len(self.padVec)
+
+    def _getAllPadCategories(self):
+        return ["left", "right"]
+
+    def _getPadCategory(self, padID):
+        if self.padVec[padID].maxX < 0:
+            return "left"
+        else:
+            return "right"
 
 class PPSHybrid8Sensor(Sensor):
     def __init__(self, shifts:list = [], PadSize = 1.3, PadSpacing = 0.1, GuardRing = 0.3):
@@ -427,6 +508,15 @@ class PPSHybrid8Sensor(Sensor):
 
         self.numPads = len(self.padVec)
 
+    def _getAllPadCategories(self):
+        return ["left", "right"]
+
+    def _getPadCategory(self, padID):
+        if self.padVec[padID].maxX < 0:
+            return "left"
+        else:
+            return "right"
+
 class PPSHybrid9Sensor(Sensor):
     def __init__(self, shifts:list = [], PadSize = 1.3, PadSpacing = 0.1, GuardRing = 0.3):
         """
@@ -470,6 +560,15 @@ class PPSHybrid9Sensor(Sensor):
 
         self.numPads = len(self.padVec)
 
+    def _getAllPadCategories(self):
+        return ["left", "right"]
+
+    def _getPadCategory(self, padID):
+        if self.padVec[padID].maxX < 0:
+            return "left"
+        else:
+            return "right"
+
 class PPSHybrid10Sensor(Sensor):
     def __init__(self, shifts:list = [], PadSize = 1.3, PadSpacing = 0.1, GuardRing = 0.3):
         """
@@ -512,6 +611,15 @@ class PPSHybrid10Sensor(Sensor):
                 self.padVec += [SensorPad(epochs = len(shifts), minX=minX, maxX=maxX, minY=minY, maxY=maxY, extra=PadSpacing/2)]
 
         self.numPads = len(self.padVec)
+
+    def _getAllPadCategories(self):
+        return ["left", "right"]
+
+    def _getPadCategory(self, padID):
+        if self.padVec[padID].maxX < 0:
+            return "left"
+        else:
+            return "right"
 
 class PPSHybrid11Sensor(Sensor):
     def __init__(self, shifts:list = [], PadSize = 1.3, PadSpacing = 0.1, GuardRing = 0.3):
@@ -559,6 +667,15 @@ class PPSHybrid11Sensor(Sensor):
 
         self.numPads = len(self.padVec)
 
+    def _getAllPadCategories(self):
+        return ["left", "right"]
+
+    def _getPadCategory(self, padID):
+        if self.padVec[padID].maxX < 0:
+            return "left"
+        else:
+            return "right"
+
 class TIProduction1Sensor(Sensor):
     def __init__(self, shifts:list = [], PadSize = 1.3, PadSpacing = 0.03, GuardRing = 0.3):
         """
@@ -596,6 +713,15 @@ class TIProduction1Sensor(Sensor):
                     self.padVec += [SensorPad(epochs = len(shifts), minX=minX, maxX=maxX, minY=minY, maxY=maxY, extra=PadSpacing/2)]
 
         self.numPads = len(self.padVec)
+
+    def _getAllPadCategories(self):
+        return ["left", "right"]
+
+    def _getPadCategory(self, padID):
+        if self.padVec[padID].maxX < 0:
+            return "left"
+        else:
+            return "right"
 
 class TIProduction2Sensor(Sensor):
     def __init__(self, shifts:list = [], PadSize = 1.3, PadSpacing = 0.03, GuardRing = 0.3):
@@ -637,6 +763,15 @@ class TIProduction2Sensor(Sensor):
 
         self.numPads = len(self.padVec)
 
+    def _getAllPadCategories(self):
+        return ["left", "right"]
+
+    def _getPadCategory(self, padID):
+        if self.padVec[padID].maxX < 0:
+            return "left"
+        else:
+            return "right"
+
 class TIProduction3Sensor(Sensor):
     def __init__(self, shifts:list = [], PadSize = 1.3, PadSpacing = 0.03, GuardRing = 0.3):
         """
@@ -676,6 +811,15 @@ class TIProduction3Sensor(Sensor):
                     self.padVec += [SensorPad(epochs = len(shifts), minX=minX, maxX=maxX, minY=minY, maxY=maxY, extra=PadSpacing/2)]
 
         self.numPads = len(self.padVec)
+
+    def _getAllPadCategories(self):
+        return ["left", "right"]
+
+    def _getPadCategory(self, padID):
+        if self.padVec[padID].maxX < 0:
+            return "left"
+        else:
+            return "right"
 
 class RectangularPadSensor(Sensor):
     def __init__(self, shifts:list = [], PadSize = 1.3, SmallPadSize = 1.3/3, PadSpacing = 0.1, GuardRing = 0.3, NumSmallerCols = 3):
@@ -724,6 +868,15 @@ class RectangularPadSensor(Sensor):
 
         self.numPads = len(self.padVec)
 
+    def _getAllPadCategories(self):
+        return ["left", "right"]
+
+    def _getPadCategory(self, padID):
+        if self.padVec[padID].maxX < 0:
+            return "left"
+        else:
+            return "right"
+
 class RectangularPadSensorVertical(Sensor):
     def __init__(self, shifts:list = [], PadSize = 1.3, SmallPadSize = 1.3/3, PadSpacing = 0.1, GuardRing = 0.3, NumSmallerCols = 3):
         """
@@ -770,3 +923,12 @@ class RectangularPadSensorVertical(Sensor):
                 self.padVec += [SensorPad(epochs = len(shifts), minX=minX, maxX=maxX, minY=minY, maxY=maxY, extra_x=extra_x, extra_y=PadSpacing/2)]
 
         self.numPads = len(self.padVec)
+
+    def _getAllPadCategories(self):
+        return ["left", "right"]
+
+    def _getPadCategory(self, padID):
+        if self.padVec[padID].maxX < 0:
+            return "left"
+        else:
+            return "right"
